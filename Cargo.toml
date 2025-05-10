@@ -8,8 +8,8 @@ name = "create-topic"
 path = "src/create_topic.rs"
 
 [[bin]]
-name = "subcriber"
-path = "src/subcriber.rs"
+name = "subscriber"
+path = "src/subscriber.rs"
 
 [[bin]]
 name = "publisher"
