@@ -2,7 +2,7 @@ use rand::rng;
 use rand::seq::IndexedRandom;
 use rdkafka::config::ClientConfig;
 use rdkafka::producer::{FutureProducer, FutureRecord};
-use serde_json::json;
+use serde_json::{json, Value};
 use std::time::Duration as StdDuration;
 use tokio::time::{sleep, Duration};
 
@@ -19,8 +19,9 @@ async fn main() {
 
     let task_types = vec!["email", "sms", "push"];
 
-    std::thread::spawn(async move || loop {
+    loop {
         let task_type = task_types.choose(&mut rng()).unwrap();
+        println!("📧 Sending task: {:?}", task_type);
         let payload = match *task_type {
             "email" => json!({
                 "to": "user@example.com",
@@ -43,14 +44,12 @@ async fn main() {
             "payload": payload
         });
 
-        let producer = producer.clone();
-        let topic = topic.clone();
-        send(&producer, task.to_string(), &topic).await;
+        send(&producer, task, &topic).await;
         sleep(Duration::from_secs(5)).await;
-    });
+    }
 }
 
-async fn send(producer: &FutureProducer, task: String, topic: &str) {
+async fn send(producer: &FutureProducer, task: Value, topic: &str) {
     let task = serde_json::to_string(&task).unwrap();
     let record: FutureRecord<'_, (), [u8]> = FutureRecord::to(&topic).payload(task.as_bytes());
 
